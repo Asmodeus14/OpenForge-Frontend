@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, type JSX } from 'react';
 import { useWeb3 } from '../hooks/web3';
 import { useProfiles, getAvatarUrl, getDisplayName } from '../hooks/useProfile';
 import io, { Socket } from 'socket.io-client';
@@ -128,10 +128,7 @@ interface Invitation {
 // Link detection regex patterns
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 const MENTION_REGEX = /(@[a-zA-Z0-9_]+)/g;
-const HASHTAG_REGEX = /(#[a-zA-Z0-9_]+)/g;
-const EMAIL_REGEX = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
 const IPFS_REGEX = /(ipfs:\/\/[a-zA-Z0-9]+)/g;
-const ETH_ADDRESS_REGEX = /(0x[a-fA-F0-9]{40})/g;
 
 // Helper function to detect content type
 const detectContentType = (content: string) => {
@@ -168,7 +165,6 @@ const extractLinks = (text: string): Array<{url: string, display: string}> => {
 // Helper function to parse and format message content
 const parseMessageContent = (content: string): JSX.Element[] => {
   const parts: JSX.Element[] = [];
-  let remaining = content;
   let key = 0;
 
   const codeBlockRegex = /```([\s\S]*?)```/g;
@@ -198,7 +194,6 @@ const parseMessageContent = (content: string): JSX.Element[] => {
     } else {
       const text = segment.content;
       const elements: (string | JSX.Element)[] = [];
-      let tempText = text;
 
       URL_REGEX.lastIndex = 0;
       const urlMatches = Array.from(text.matchAll(URL_REGEX));
@@ -342,38 +337,6 @@ const LinkPreview = ({ url }: { url: string }) => {
   );
 };
 
-const formatDateHeader = (dateString: string): string => {
-  const date = new Date(dateString);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  
-  const compareDate = new Date(date);
-  compareDate.setHours(0, 0, 0, 0);
-  const compareToday = new Date(today);
-  compareToday.setHours(0, 0, 0, 0);
-  const compareYesterday = new Date(yesterday);
-  compareYesterday.setHours(0, 0, 0, 0);
-  
-  if (compareDate.getTime() === compareToday.getTime()) {
-    return 'Today';
-  } else if (compareDate.getTime() === compareYesterday.getTime()) {
-    return 'Yesterday';
-  } else {
-    const diffTime = Math.abs(today.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays <= 7) {
-      return date.toLocaleDateString('en-US', { weekday: 'long' });
-    } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'long', 
-        day: 'numeric',
-        year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
-      });
-    }
-  }
-};
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -393,17 +356,6 @@ const formatTime = (timestamp: string) => {
   });
 };
 
-const formatFullDateTime = (timestamp: string) => {
-  const date = new Date(timestamp);
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  });
-};
 
 const groupMessagesByDate = (messages: Message[]): { [date: string]: Message[] } => {
   const grouped: { [date: string]: Message[] } = {};
@@ -723,7 +675,7 @@ const ChatPage: React.FC = () => {
     return Array.from(addresses);
   }, [account, rooms, messages, roomMembers, invitations]);
 
-  const { profiles: fetchedProfiles, loading: profilesLoading } = useProfiles(uniqueWalletAddresses);
+  const { profiles: fetchedProfiles } = useProfiles(uniqueWalletAddresses);
 
   useEffect(() => {
     if (fetchedProfiles) {

@@ -341,7 +341,7 @@ export default function CreateProject() {
       const tx = await contract.registerProject(metadataCID);
       setStatus("Waiting for transaction confirmation...");
 
-      contract.once("ProjectRegistered", (projectId, builder, cid) => {
+      contract.once("ProjectRegistered", (projectId, builder) => {
         console.log(`Project #${projectId.toString()} created by ${builder}`);
         setStatus(`✅ Project #${projectId.toString()} created successfully!`);
       });

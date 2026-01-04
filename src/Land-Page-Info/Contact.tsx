@@ -7,8 +7,6 @@ import {
   Clock,
   Globe,
   Send,
-  CheckCircle,
-  AlertCircle,
   Twitter,
   Github,
   Linkedin,
@@ -97,7 +95,7 @@ const ContactPage = () => {
     }
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setIsSubmitting(true);
     

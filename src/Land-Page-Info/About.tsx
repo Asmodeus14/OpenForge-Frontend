@@ -1,19 +1,14 @@
 import { useState } from "react";
 import { 
   Heart,
-  Users,
-  Code,
-  Globe,
   Shield,
   Zap,
   Target,
-  BookOpen,
   MessageSquare,
   Calendar,
   UserCircle,
   ArrowRight,
   Sparkles,
-  Star,
   ChevronRight,
   Coins,
   Database,
@@ -28,7 +23,7 @@ import {
 
 const AboutPage = () => {
   const [activeBlog, setActiveBlog] = useState(0);
-  const [blogs, setBlogs] = useState([
+  const [blogs] = useState([
     {
       id: 1,
       title: "Introducing OpenForge Coin",
