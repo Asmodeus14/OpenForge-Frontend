@@ -183,4 +183,4 @@ export const ProjectRegistryABI = [
 ] as const;
 
 // Contract address - replace with your deployed contract address
-export const PROJECT_CONTRACT_ADDRESS = "0x8FC5B7c7CcAa22A062ab29216f29317d7BE85106";
+export const PROJECT_CONTRACT_ADDRESS = "0x8796CbE1a841690E51DB3212C88533c0213c66d2";

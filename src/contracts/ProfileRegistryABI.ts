@@ -1,6 +1,6 @@
 // contracts/ProfileRegistryABI.ts
 export const PROFILE_CONTRACT_ADDRESS =
-  "0x13f307dd0E3e46c22DD04b6D492d7B62B86C0f37";
+  "0xb8c5a55D3b0E838e2f96cBdF893f90c5362F3E46";
 
 export const ProfileRegistryABI = [
   // Functions

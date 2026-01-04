@@ -1372,4 +1372,4 @@ export const OpenForgeProjectRegistryABI = [
   }
 ] as const;
 
-export const REGISTRY_ADDRESS = '0xb0D9d40490995c91B0d2259B27c77Ba36B732260';
+export const REGISTRY_ADDRESS = '0x19B0aB8A58684F2d4C8E1B0cC4D3e9Ad73d0d59a';

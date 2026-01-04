@@ -5,7 +5,6 @@ import LogoSVG from "../component/Logo";
 import { 
   Home, 
   Briefcase, 
-  Users, 
   FileText, // Changed from Bell to FileText for contracts icon
   MessageSquare, 
   Bookmark, 
