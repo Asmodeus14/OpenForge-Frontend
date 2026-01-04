@@ -19,7 +19,7 @@ import {
   Zap,
   RefreshCw,
   Sparkles,
-  Gradient,
+  
   Eye
 } from 'lucide-react';
 
@@ -282,7 +282,7 @@ export default function Settings() {
             
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <Gradient className="w-5 h-5 text-gray-500" />
+                
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Gradient Intensity

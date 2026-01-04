@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useWeb3 } from '../hooks/web3';
 import { useProfiles, getAvatarUrl, getDisplayName } from '../hooks/useProfile';
 import io, { Socket } from 'socket.io-client';
@@ -22,9 +22,7 @@ import {
   Bell,
   User,
   ChevronRight,
-  ChevronLeft,
   Loader2,
-  AlertCircle,
   Mail,
   UserPlus,
   Copy,
@@ -32,10 +30,7 @@ import {
   Crown,
   X,
   Smile,
-  Maximize2,
-  Minimize2,
   Sparkles,
-  Rocket,
   ExternalLink,
   Code,
   Image as ImageIcon,
@@ -48,18 +43,9 @@ import {
   Clock,
   ChevronDown,
   ChevronUp,
-  Zap,
-  Settings,
-  Hash,
-  AtSign,
   Video,
   Mic,
-  Paperclip,
-  MoreHorizontal,
-  Bot,
-  Shield,
-  Star
-} from 'lucide-react';
+  Paperclip} from 'lucide-react';
 
 // API configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
