@@ -64,5 +64,8 @@
   },
   "resolutions": {
     "use-sync-external-store": "1.2.0"
+  },
+  "engines": {
+    "node": ">=20 <21"
   }
 }
