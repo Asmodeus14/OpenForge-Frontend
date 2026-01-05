@@ -4,12 +4,11 @@ import { useProfiles, getAvatarUrl, getDisplayName } from '../hooks/useProfile';
 import io, { Socket } from 'socket.io-client';
 import { ethers } from 'ethers';
 import { Toaster, toast } from 'react-hot-toast';
-import Sidebar from '../component/Sidebar';
-import { 
-  Send, 
-  Users, 
-  Lock, 
-  CheckCircle, 
+import {
+  Send,
+  Users,
+  Lock,
+  CheckCircle,
   XCircle,
   LogOut,
   Trash2,
@@ -45,7 +44,8 @@ import {
   ChevronUp,
   Video,
   Mic,
-  Paperclip} from 'lucide-react';
+  Paperclip
+} from 'lucide-react';
 
 // API configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -140,9 +140,9 @@ const detectContentType = (content: string) => {
 };
 
 // Helper function to extract links
-const extractLinks = (text: string): Array<{url: string, display: string}> => {
-  const links: Array<{url: string, display: string}> = [];
-  
+const extractLinks = (text: string): Array<{ url: string, display: string }> => {
+  const links: Array<{ url: string, display: string }> = [];
+
   const urlMatches = text.match(URL_REGEX) || [];
   urlMatches.forEach(url => {
     links.push({
@@ -150,7 +150,7 @@ const extractLinks = (text: string): Array<{url: string, display: string}> => {
       display: url.replace(/^https?:\/\//, '').replace(/\/$/, '')
     });
   });
-  
+
   const ipfsMatches = text.match(IPFS_REGEX) || [];
   ipfsMatches.forEach(ipfsUrl => {
     links.push({
@@ -158,7 +158,7 @@ const extractLinks = (text: string): Array<{url: string, display: string}> => {
       display: `ipfs://${ipfsUrl.replace('ipfs://', '').substring(0, 12)}...`
     });
   });
-  
+
   return links;
 };
 
@@ -197,17 +197,17 @@ const parseMessageContent = (content: string): JSX.Element[] => {
 
       URL_REGEX.lastIndex = 0;
       const urlMatches = Array.from(text.matchAll(URL_REGEX));
-      
+
       if (urlMatches.length > 0) {
         let lastIndex = 0;
         urlMatches.forEach((match, idx) => {
           const url = match[0];
           const displayUrl = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-          
+
           if (match.index! > lastIndex) {
             elements.push(text.substring(lastIndex, match.index!));
           }
-          
+
           elements.push(
             <a
               key={`url-${idx}`}
@@ -221,14 +221,14 @@ const parseMessageContent = (content: string): JSX.Element[] => {
               {displayUrl.length > 40 ? `${displayUrl.substring(0, 40)}...` : displayUrl}
             </a>
           );
-          
+
           lastIndex = match.index! + url.length;
         });
-        
+
         if (lastIndex < text.length) {
           elements.push(text.substring(lastIndex));
         }
-        
+
         parts.push(
           <span key={key++} className="whitespace-pre-wrap break-words">
             {elements}
@@ -337,11 +337,10 @@ const LinkPreview = ({ url }: { url: string }) => {
   );
 };
 
-
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    month: 'short', 
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
     day: 'numeric',
     year: 'numeric'
   });
@@ -349,32 +348,31 @@ const formatDate = (dateString: string): string => {
 
 const formatTime = (timestamp: string) => {
   const date = new Date(timestamp);
-  return date.toLocaleTimeString('en-US', { 
-    hour: 'numeric', 
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
     minute: '2-digit',
-    hour12: true 
+    hour12: true
   });
 };
 
-
 const groupMessagesByDate = (messages: Message[]): { [date: string]: Message[] } => {
   const grouped: { [date: string]: Message[] } = {};
-  
-  const sortedMessages = [...messages].sort((a, b) => 
+
+  const sortedMessages = [...messages].sort((a, b) =>
     new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   );
-  
+
   sortedMessages.forEach(message => {
     const date = new Date(message.created_at);
     const dateKey = date.toISOString().split('T')[0];
-    
+
     if (!grouped[dateKey]) {
       grouped[dateKey] = [];
     }
-    
+
     grouped[dateKey].push(message);
   });
-  
+
   return grouped;
 };
 
@@ -410,19 +408,19 @@ const useChatAuth = () => {
     }
   };
 
-  const getNonce = async (walletAddress: string): Promise<{nonce: string, message: string}> => {
+  const getNonce = async (walletAddress: string): Promise<{ nonce: string, message: string }> => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/nonce`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ walletAddress })
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to get nonce');
       }
-      
+
       return await response.json();
     } catch (error: any) {
       console.error('Get nonce error:', error);
@@ -451,7 +449,7 @@ const useChatAuth = () => {
 
       const nonceData = await getNonce(account);
       const message = nonceData.message;
-      
+
       if (!window.ethereum) {
         throw new Error('No Ethereum provider found');
       }
@@ -459,7 +457,7 @@ const useChatAuth = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signature = await signer.signMessage(message);
-      
+
       const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -476,7 +474,7 @@ const useChatAuth = () => {
 
       const data = await response.json();
       const newToken = data.token;
-      
+
       if (!newToken) {
         throw new Error('No token received from server');
       }
@@ -484,7 +482,7 @@ const useChatAuth = () => {
       setStoredToken(account, newToken);
       setToken(newToken);
       setCurrentWallet(account);
-      
+
       toast.success('Authentication successful!', {
         style: {
           background: '#000',
@@ -503,11 +501,11 @@ const useChatAuth = () => {
           border: '1px solid #222'
         }
       });
-      
+
       clearStoredToken(account);
       setToken(null);
       setCurrentWallet(null);
-      
+
       return null;
     } finally {
       setIsAuthenticating(false);
@@ -526,7 +524,7 @@ const useChatAuth = () => {
   useEffect(() => {
     if (account && !isAuthenticating) {
       const storedToken = getStoredToken(account);
-      
+
       if (storedToken) {
         setToken(storedToken);
         setCurrentWallet(account);
@@ -549,10 +547,10 @@ const useChatAuth = () => {
 const DateSeparator: React.FC<{ date: string }> = ({ date }) => {
   const today = new Date();
   const separatorDate = new Date(date);
-  
+
   const isToday = separatorDate.toDateString() === today.toDateString();
   const isYesterday = new Date(today.setDate(today.getDate() - 1)).toDateString() === separatorDate.toDateString();
-  
+
   let displayText = '';
   if (isToday) {
     displayText = 'Today';
@@ -561,18 +559,18 @@ const DateSeparator: React.FC<{ date: string }> = ({ date }) => {
   } else {
     const diffTime = Math.abs(new Date().getTime() - separatorDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays <= 7) {
       displayText = separatorDate.toLocaleDateString('en-US', { weekday: 'long' });
     } else {
-      displayText = separatorDate.toLocaleDateString('en-US', { 
-        month: 'long', 
+      displayText = separatorDate.toLocaleDateString('en-US', {
+        month: 'long',
         day: 'numeric',
         year: separatorDate.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
       });
     }
   }
-  
+
   return (
     <div className="flex items-center justify-center my-6">
       <div className="flex items-center gap-2 px-4 py-2 bg-[#111] backdrop-blur-sm rounded-full border border-gray-900">
@@ -599,11 +597,11 @@ const TimeSeparator: React.FC<{ time: string }> = ({ time }) => {
 
 const isSameSenderAndTime = (msg1: Message, msg2: Message, timeThresholdMinutes = 5): boolean => {
   if (msg1.sender_wallet !== msg2.sender_wallet) return false;
-  
+
   const time1 = new Date(msg1.created_at).getTime();
   const time2 = new Date(msg2.created_at).getTime();
   const diffMinutes = Math.abs(time1 - time2) / (1000 * 60);
-  
+
   return diffMinutes <= timeThresholdMinutes;
 };
 
@@ -642,7 +640,7 @@ const ChatPage: React.FC = () => {
   const [roomMenuOpen, setRoomMenuOpen] = useState<string | null>(null);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  
+
   const [messageRows, setMessageRows] = useState(1);
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
   const [showRoomSidebar, setShowRoomSidebar] = useState(false);
@@ -665,13 +663,13 @@ const ChatPage: React.FC = () => {
 
   const uniqueWalletAddresses = useMemo(() => {
     const addresses = new Set<string>();
-    
+
     if (account) addresses.add(account);
     rooms.forEach(room => { if (room.admin_id) addresses.add(room.admin_id); });
     messages.forEach(message => { if (message.sender_wallet) addresses.add(message.sender_wallet); });
     roomMembers.forEach(member => { if (member.wallet_address) addresses.add(member.wallet_address); });
     invitations.forEach(invite => { if (invite.inviter_wallet) addresses.add(invite.inviter_wallet); });
-    
+
     return Array.from(addresses);
   }, [account, rooms, messages, roomMembers, invitations]);
 
@@ -695,9 +693,9 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     if (token && account && currentWallet === account) {
       const newSocket = io(SOCKET_URL, {
-        auth: { 
+        auth: {
           token: token,
-          walletAddress: account 
+          walletAddress: account
         },
         transports: ['websocket', 'polling'],
         reconnection: true,
@@ -731,7 +729,7 @@ const ChatPage: React.FC = () => {
         if (selectedRoom && message.room_id === selectedRoom.id) {
           setMessages(prev => {
             const newMessages = [...prev, message];
-            return newMessages.sort((a, b) => 
+            return newMessages.sort((a, b) =>
               new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
             );
           });
@@ -740,15 +738,15 @@ const ChatPage: React.FC = () => {
       });
 
       newSocket.on('message_liked', (data) => {
-        setMessages(prev => prev.map(msg => 
-          msg.id === data.messageId 
-            ? { 
-                ...msg, 
-                like_count: data.likeCount,
-                liked_by: data.likeCount > (msg.like_count || 0)
-                  ? [...(msg.liked_by || []), data.walletAddress]
-                  : (msg.liked_by || []).filter(addr => addr !== data.walletAddress)
-              }
+        setMessages(prev => prev.map(msg =>
+          msg.id === data.messageId
+            ? {
+              ...msg,
+              like_count: data.likeCount,
+              liked_by: data.likeCount > (msg.like_count || 0)
+                ? [...(msg.liked_by || []), data.walletAddress]
+                : (msg.liked_by || []).filter(addr => addr !== data.walletAddress)
+            }
             : msg
         ));
       });
@@ -825,11 +823,11 @@ const ChatPage: React.FC = () => {
 
   const handleScroll = () => {
     setIsScrolling(true);
-    
+
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
-    
+
     scrollTimeoutRef.current = setTimeout(() => {
       setIsScrolling(false);
     }, 100);
@@ -901,22 +899,22 @@ const ChatPage: React.FC = () => {
       setMessages([]);
       return;
     }
-    
+
     try {
       setIsLoading(true);
       const data = await apiRequest(`/rooms/${roomId}/messages?limit=100`);
-      
+
       const messagesWithDefaults = (data.messages || []).map((msg: any) => ({
         ...msg,
         liked_by: msg.liked_by || [],
         like_count: msg.like_count || 0,
         attachments: msg.attachments || []
       }));
-      
-      const sortedMessages = messagesWithDefaults.sort((a: Message, b: Message) => 
+
+      const sortedMessages = messagesWithDefaults.sort((a: Message, b: Message) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
-      
+
       setMessages(sortedMessages);
       setCollapsedDates(new Set());
     } catch (error: any) {
@@ -951,7 +949,7 @@ const ChatPage: React.FC = () => {
       setPendingRequests([]);
       return;
     }
-    
+
     try {
       const data = await apiRequest(`/rooms/${roomId}/requests`);
       if (data.success && data.requests) {
@@ -1077,7 +1075,7 @@ const ChatPage: React.FC = () => {
 
   const handleDeleteRoom = async (roomId: string) => {
     if (!window.confirm('Are you sure you want to delete this room?')) return;
-    
+
     try {
       await apiRequest(`/rooms/${roomId}`, {
         method: 'DELETE'
@@ -1156,7 +1154,7 @@ const ChatPage: React.FC = () => {
       });
       return;
     }
-    
+
     try {
       await apiRequest(`/rooms/${roomId}/requests/${requestId}/approve`, {
         method: 'POST'
@@ -1193,7 +1191,7 @@ const ChatPage: React.FC = () => {
       });
       return;
     }
-    
+
     try {
       await apiRequest(`/rooms/${roomId}/requests/${requestId}/reject`, {
         method: 'POST'
@@ -1231,10 +1229,10 @@ const ChatPage: React.FC = () => {
       });
       loadInvitations();
       loadUserRooms();
-      
+
       if (result.room_id) {
-        const acceptedRoom = rooms.find(room => room.id === result.room_id) || 
-                           publicRooms.find(room => room.id === result.room_id);
+        const acceptedRoom = rooms.find(room => room.id === result.room_id) ||
+          publicRooms.find(room => room.id === result.room_id);
         if (acceptedRoom) {
           setSelectedRoom(acceptedRoom);
         }
@@ -1321,7 +1319,7 @@ const ChatPage: React.FC = () => {
       }
 
       const data = await response.json();
-      
+
       if (socket) {
         socket.emit('send_message', {
           roomId: selectedRoom.id,
@@ -1456,9 +1454,9 @@ const ChatPage: React.FC = () => {
 
   const filterRooms = (rooms: Room[], query: string) => {
     if (!query.trim()) return rooms;
-    
+
     const searchTerm = query.toLowerCase();
-    return rooms.filter(room => 
+    return rooms.filter(room =>
       room.name.toLowerCase().includes(searchTerm) ||
       (room.description && room.description.toLowerCase().includes(searchTerm)) ||
       room.room_type.toLowerCase().includes(searchTerm)
@@ -1483,8 +1481,8 @@ const ChatPage: React.FC = () => {
     const content = message.content;
     const isExpanded = expandedMessages.has(message.id);
     const isLongMessage = content.length > 500;
-    const displayContent = isLongMessage && !isExpanded 
-      ? content.substring(0, 500) + '...' 
+    const displayContent = isLongMessage && !isExpanded
+      ? content.substring(0, 500) + '...'
       : content;
 
     const links = extractLinks(displayContent);
@@ -1496,7 +1494,7 @@ const ChatPage: React.FC = () => {
         <div className="whitespace-pre-wrap break-words leading-relaxed text-gray-200">
           {parseMessageContent(displayContent)}
         </div>
-        
+
         {message.attachments && message.attachments.length > 0 && (
           <div className="space-y-2 mt-2">
             {message.attachments.map((attachment) => (
@@ -1631,20 +1629,20 @@ const ChatPage: React.FC = () => {
     return dateKeys.map((dateKey) => {
       const dateMessages = grouped[dateKey];
       const isCollapsed = collapsedDates.has(dateKey);
-      
+
       const timeBlocks: { time: string; messages: Message[] }[] = [];
       let currentBlock: Message[] = [];
       let currentBlockStart: Date | null = null;
 
       dateMessages.forEach((message, index) => {
         const messageTime = new Date(message.created_at);
-        
+
         if (!currentBlockStart) {
           currentBlockStart = messageTime;
           currentBlock.push(message);
         } else {
           const diffMinutes = (messageTime.getTime() - currentBlockStart.getTime()) / (1000 * 60);
-          
+
           if (diffMinutes > 30) {
             timeBlocks.push({
               time: formatTime(currentBlockStart.toISOString()),
@@ -1668,7 +1666,7 @@ const ChatPage: React.FC = () => {
       return (
         <div key={dateKey} className="mb-6">
           <DateSeparator date={dateKey} />
-          
+
           {dateMessages.length > 10 && (
             <button
               onClick={() => {
@@ -1695,7 +1693,7 @@ const ChatPage: React.FC = () => {
               )}
             </button>
           )}
-          
+
           {!isCollapsed && (
             <div className="space-y-1">
               {timeBlocks.map((block, blockIndex) => (
@@ -1707,8 +1705,8 @@ const ChatPage: React.FC = () => {
                     const profile = userProfiles[message.sender_wallet];
                     const displayName = getDisplayName(message.sender_wallet, profile);
                     const avatarUrl = getAvatarUrl(profile);
-                    
-                    const showSenderInfo = msgIndex === 0 || 
+
+                    const showSenderInfo = msgIndex === 0 ||
                       !isSameSenderAndTime(message, block.messages[msgIndex - 1]);
 
                     return (
@@ -1716,11 +1714,11 @@ const ChatPage: React.FC = () => {
                         key={message.id}
                         className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-1 group max-w-full`}
                       >
-                        <div className={`max-w-[85%] sm:max-w-[70%] rounded-2xl p-4 ${isOwnMessage 
-                          ? 'bg-gradient-to-r from-cyan-900/30 to-cyan-900/10 border border-cyan-900/50 backdrop-blur-sm' 
+                        <div className={`max-w-[85%] sm:max-w-[70%] rounded-2xl p-4 ${isOwnMessage
+                          ? 'bg-gradient-to-r from-cyan-900/30 to-cyan-900/10 border border-cyan-900/50 backdrop-blur-sm'
                           : 'bg-[#0a0a0a] border border-gray-900 backdrop-blur-sm'
-                        } hover:border-cyan-500/30 transition-all duration-200`}>
-                          
+                          } hover:border-cyan-500/30 transition-all duration-200`}>
+
                           {showSenderInfo && !isOwnMessage && (
                             <div className="flex items-center gap-2 mb-2">
                               <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-gray-900">
@@ -1746,13 +1744,13 @@ const ChatPage: React.FC = () => {
                                   </div>
                                 )}
                               </div>
-                              
+
                               <div className="flex flex-col min-w-0 flex-1">
                                 <div className="flex items-center gap-2 min-w-0">
-                                  <span className={`font-bold text-sm truncate ${isOwnMessage 
-                                    ? 'text-cyan-400' 
+                                  <span className={`font-bold text-sm truncate ${isOwnMessage
+                                    ? 'text-cyan-400'
                                     : 'text-gray-300'
-                                  }`}>
+                                    }`}>
                                     {isOwnMessage ? 'You' : displayName}
                                   </span>
                                   <span className={`text-xs whitespace-nowrap ${isOwnMessage ? 'text-cyan-400/70' : 'text-gray-600'}`}>
@@ -1765,7 +1763,7 @@ const ChatPage: React.FC = () => {
                               </div>
                             </div>
                           )}
-                          
+
                           {isOwnMessage && !showSenderInfo && (
                             <div className="text-right mb-1">
                               <span className="text-xs text-cyan-400/70">
@@ -1781,15 +1779,15 @@ const ChatPage: React.FC = () => {
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => 
-                                  isLikedByMe 
+                                onClick={() =>
+                                  isLikedByMe
                                     ? handleUnlikeMessage(message.id)
                                     : handleLikeMessage(message.id)
                                 }
-                                className={`p-1 rounded transition-colors ${isLikedByMe 
-                                  ? 'text-cyan-400 hover:text-cyan-300' 
+                                className={`p-1 rounded transition-colors ${isLikedByMe
+                                  ? 'text-cyan-400 hover:text-cyan-300'
                                   : 'text-gray-600 hover:text-cyan-400'
-                                }`}
+                                  }`}
                                 title={isLikedByMe ? "Unlike" : "Like"}
                               >
                                 <ThumbsUp className="w-3 h-3" />
@@ -1800,7 +1798,7 @@ const ChatPage: React.FC = () => {
                                 </span>
                               )}
                             </div>
-                            
+
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
                                 className="p-1 text-gray-600 hover:text-cyan-400"
@@ -1818,7 +1816,7 @@ const ChatPage: React.FC = () => {
                               >
                                 <Copy className="w-3 h-3" />
                               </button>
-                              
+
                               {message.attachments && message.attachments.length > 0 && (
                                 <button
                                   className="p-1 text-gray-600 hover:text-cyan-400"
@@ -1826,12 +1824,12 @@ const ChatPage: React.FC = () => {
                                     const attachmentLinks = message.attachments!.map(a => a.url).join('\n');
                                     navigator.clipboard.writeText(attachmentLinks);
                                     toast.success('Attachment links copied!', {
-                                    style: {
-                                      background: '#000',
-                                      color: '#fff',
-                                      border: '1px solid #222'
-                                    }
-                                  });
+                                      style: {
+                                        background: '#000',
+                                        color: '#fff',
+                                        border: '1px solid #222'
+                                      }
+                                    });
                                   }}
                                   title="Copy attachment links"
                                 >
@@ -1864,7 +1862,7 @@ const ChatPage: React.FC = () => {
             OpenForge Chat
           </h1>
           <p className="mb-8 text-gray-500">
-            Connect your wallet to start chatting with the OpenForge community. 
+            Connect your wallet to start chatting with the OpenForge community.
             Collaborate, share ideas, and build amazing projects together.
           </p>
           <button
@@ -1938,8 +1936,8 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black flex">
-      <Toaster 
-        position="top-right" 
+      <Toaster
+        position="top-right"
         toastOptions={{
           style: {
             background: '#000',
@@ -1948,16 +1946,11 @@ const ChatPage: React.FC = () => {
           }
         }}
       />
-      
-      {/* Main App Sidebar */}
-      <div className="hidden lg:block fixed left-0 top-0 h-full w-20 z-30">
-        <Sidebar activeTab="messages" showCreateButton={false} />
-      </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:ml-20 min-h-screen w-full">
+      <div className="flex-1 min-h-screen w-full">
         <div className="flex h-full">
-          {/* Chat Rooms Sidebar */}
+          {/* Chat Rooms Sidebar - Fixed position */}
           <div className={`
             ${showRoomSidebar ? 'block' : 'hidden'} 
             lg:block
@@ -1968,6 +1961,8 @@ const ChatPage: React.FC = () => {
             fixed inset-y-0 left-0 z-40
             transform transition-transform duration-300
             ${showRoomSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            flex flex-col
+            h-screen
           `}>
             {/* Mobile close button */}
             {showRoomSidebar && (
@@ -1980,9 +1975,9 @@ const ChatPage: React.FC = () => {
                 </button>
               </div>
             )}
-            
+
             <div className="h-full flex flex-col overflow-hidden">
-              <div className="p-4 border-b border-gray-900">
+              <div className="p-4 border-b border-gray-900 flex-shrink-0">
                 <div className="hidden lg:flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-900/30 to-black flex items-center justify-center border border-cyan-900/50">
@@ -1994,7 +1989,7 @@ const ChatPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mb-4 p-3 rounded-xl bg-[#111] border border-gray-900">
                   <div className="flex items-center justify-between">
                     <div className="text-center">
@@ -2024,7 +2019,7 @@ const ChatPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex border-b border-gray-900 bg-black">
+              <div className="flex border-b border-gray-900 bg-black flex-shrink-0">
                 <button
                   onClick={() => setActiveTab('rooms')}
                   className={`flex-1 py-3 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${activeTab === 'rooms' ? 'bg-[#111] text-cyan-400 border-b-2 border-cyan-500' : 'hover:bg-[#111] text-gray-500'}`}
@@ -2058,7 +2053,8 @@ const ChatPage: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-auto p-4">
+              {/* Room List - Scrollable but independent */}
+              <div className="flex-1 overflow-y-auto p-4" style={{ maxHeight: 'calc(100vh - 300px)' }}>
                 {isLoading ? (
                   <div className="text-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-cyan-500" />
@@ -2088,31 +2084,29 @@ const ChatPage: React.FC = () => {
                           setSelectedRoom(room);
                           setShowRoomSidebar(false);
                         }}
-                        className={`p-3 rounded-xl cursor-pointer transition-all duration-200 group border ${
-                          selectedRoom?.id === room.id 
-                            ? 'bg-gradient-to-r from-cyan-900/20 to-black border-cyan-900/50' 
-                            : 'bg-[#111] border-gray-900 hover:border-cyan-900/50'
-                        }`}
+                        className={`p-3 rounded-xl cursor-pointer transition-all duration-200 group border ${selectedRoom?.id === room.id
+                          ? 'bg-gradient-to-r from-cyan-900/20 to-black border-cyan-900/50'
+                          : 'bg-[#111] border-gray-900 hover:border-cyan-900/50'
+                          }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            room.room_type === 'public' ? 'bg-gradient-to-br from-blue-900/30 to-black border border-blue-900/50' :
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${room.room_type === 'public' ? 'bg-gradient-to-br from-blue-900/30 to-black border border-blue-900/50' :
                             room.room_type === 'private' ? 'bg-gradient-to-br from-purple-900/30 to-black border border-purple-900/50' :
-                            'bg-gradient-to-br from-gray-900 to-black border border-gray-900'
-                          }`}>
+                              'bg-gradient-to-br from-gray-900 to-black border border-gray-900'
+                            }`}>
                             {getRoomIcon(room.room_type)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 mb-1">
                               <p className="font-medium truncate text-gray-200">{room.name}</p>
                               {room.status === 'pending' && (
-                                <span className="bg-amber-900/30 text-amber-400 text-xs px-2 py-0.5 rounded-full border border-amber-900/50">Pending</span>
+                                <span className="bg-amber-900/30 text-amber-400 text-xs px-2 py-0.5 rounded-full border border-amber-900/50 whitespace-nowrap">Pending</span>
                               )}
                               {room.is_admin && (
-                                <span className="bg-gradient-to-r from-cyan-900/20 to-black text-cyan-400 text-xs px-2 py-0.5 rounded-full border border-cyan-900/50">Admin</span>
+                                <span className="bg-gradient-to-r from-cyan-900/20 to-black text-cyan-400 text-xs px-2 py-0.5 rounded-full border border-cyan-900/50 whitespace-nowrap">Admin</span>
                               )}
                             </div>
-                            <p className="text-xs truncate text-gray-500">
+                            <p className="text-xs text-gray-500 line-clamp-2 break-words">
                               {room.description || `${room.room_type.charAt(0).toUpperCase() + room.room_type.slice(1)} room`}
                             </p>
                           </div>
@@ -2128,7 +2122,7 @@ const ChatPage: React.FC = () => {
                             </button>
                           </div>
                         </div>
-                        
+
                         {roomMenuOpen === room.id && (
                           <div className="mt-2 p-2 rounded-lg bg-black border border-gray-900 shadow-2xl z-50">
                             <div className="space-y-1">
@@ -2215,7 +2209,7 @@ const ChatPage: React.FC = () => {
                       filteredPublicRooms.map(room => {
                         const isMember = rooms.some(r => r.id === room.id);
                         const memberStatus = rooms.find(r => r.id === room.id)?.status;
-                        
+
                         return (
                           <div
                             key={room.id}
@@ -2225,9 +2219,14 @@ const ChatPage: React.FC = () => {
                               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-900/30 to-black flex items-center justify-center border border-blue-900/50">
                                 <Globe className="w-4 h-4 text-blue-400" />
                               </div>
-                              <div className="flex-1">
-                                <p className="font-medium text-gray-200">{room.name}</p>
-                                <p className="text-xs text-gray-500">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="font-medium truncate text-gray-200">{room.name}</p>
+                                </div>
+                                <p className="text-xs text-gray-500 line-clamp-2 break-words">
+                                  {room.description || `${room.room_type.charAt(0).toUpperCase() + room.room_type.slice(1)} room`}
+                                </p>
+                                <p className="text-xs text-gray-600 mt-1">
                                   {room.member_count || 0} members
                                 </p>
                               </div>
@@ -2238,11 +2237,10 @@ const ChatPage: React.FC = () => {
                                       setSelectedRoom(room);
                                       setShowRoomSidebar(false);
                                     }}
-                                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                      memberStatus === 'pending'
-                                        ? 'bg-amber-900/30 text-amber-400 border border-amber-900/50'
-                                        : 'bg-gradient-to-r from-cyan-900/30 to-black text-cyan-400 border border-cyan-900/50'
-                                    }`}
+                                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 ${memberStatus === 'pending'
+                                      ? 'bg-amber-900/30 text-amber-400 border border-amber-900/50'
+                                      : 'bg-gradient-to-r from-cyan-900/30 to-black text-cyan-400 border border-cyan-900/50'
+                                      }`}
                                   >
                                     {memberStatus === 'pending' ? 'Pending' : 'Open'}
                                   </button>
@@ -2277,9 +2275,9 @@ const ChatPage: React.FC = () => {
                             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-900/30 to-black flex items-center justify-center border border-purple-900/50">
                               <Mail className="w-4 h-4 text-purple-400" />
                             </div>
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-200">{invite.room_name || `Room Invitation`}</p>
-                              <p className="text-xs text-gray-500">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate text-gray-200">{invite.room_name || `Room Invitation`}</p>
+                              <p className="text-xs text-gray-500 truncate">
                                 Invited by: {formatWalletAddress(invite.inviter_wallet)}
                               </p>
                             </div>
@@ -2307,7 +2305,7 @@ const ChatPage: React.FC = () => {
                 )}
               </div>
 
-              <div className="p-4 border-t border-gray-900 space-y-2 bg-black">
+              <div className="p-4 border-t border-gray-900 space-y-2 bg-black flex-shrink-0">
                 <button
                   onClick={loadUserRooms}
                   disabled={isLoading}
@@ -2337,10 +2335,11 @@ const ChatPage: React.FC = () => {
             min-h-screen
             bg-black
             w-full
+            flex flex-col
           `}>
             {selectedRoom ? (
               <>
-                <div className="p-4 border-b border-gray-900 bg-[#0a0a0a] flex items-center justify-between sticky top-0 z-20">
+                <div className="p-4 border-b border-gray-900 bg-[#0a0a0a] flex items-center justify-between sticky top-0 z-20 flex-shrink-0">
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setShowRoomSidebar(!showRoomSidebar)}
@@ -2348,15 +2347,14 @@ const ChatPage: React.FC = () => {
                     >
                       <ChevronRight className="w-5 h-5 text-gray-300" />
                     </button>
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      selectedRoom.room_type === 'public' ? 'bg-gradient-to-br from-blue-900/30 to-black border border-blue-900/50' :
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedRoom.room_type === 'public' ? 'bg-gradient-to-br from-blue-900/30 to-black border border-blue-900/50' :
                       selectedRoom.room_type === 'private' ? 'bg-gradient-to-br from-purple-900/30 to-black border border-purple-900/50' :
-                      'bg-gradient-to-br from-gray-900 to-black border border-gray-900'
-                    }`}>
+                        'bg-gradient-to-br from-gray-900 to-black border border-gray-900'
+                      }`}>
                       {getRoomIcon(selectedRoom.room_type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mb-1">
                         <h2 className="font-bold text-lg truncate text-gray-200">{selectedRoom.name}</h2>
                         {selectedRoom.is_admin && (
                           <Crown className="w-5 h-5 text-amber-400 flex-shrink-0" />
@@ -2365,13 +2363,13 @@ const ChatPage: React.FC = () => {
                           <span className="bg-amber-900/30 text-amber-400 text-xs px-2 py-1 rounded-full whitespace-nowrap border border-amber-900/50">Pending Approval</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500 truncate">
+                      <p className="text-sm text-gray-500 line-clamp-1 break-words">
                         {selectedRoom.description || `${selectedRoom.room_type} room`}
                         {selectedRoom.member_count && ` • ${selectedRoom.member_count} members`}
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setShowMemberList(!showMemberList)}
@@ -2392,7 +2390,7 @@ const ChatPage: React.FC = () => {
                         <span className="hidden sm:inline">Invite</span>
                       </button>
                     )}
-                    
+
                     {selectedRoom.room_type === 'public' && selectedRoom.is_admin && (
                       <button
                         onClick={() => {
@@ -2411,7 +2409,7 @@ const ChatPage: React.FC = () => {
                         )}
                       </button>
                     )}
-                    
+
                     <div className="flex sm:hidden gap-1">
                       <button
                         onClick={() => setShowMemberList(!showMemberList)}
@@ -2447,7 +2445,7 @@ const ChatPage: React.FC = () => {
                         </button>
                       )}
                     </div>
-                    
+
                     <button
                       onClick={() => handleLeaveRoom(selectedRoom.id)}
                       className="px-3 sm:px-4 py-2 bg-gradient-to-r from-red-900/30 to-black hover:from-red-800/30 hover:to-black rounded-xl font-medium transition-all duration-200 flex items-center gap-2 text-red-400 border border-red-900/50"
@@ -2477,7 +2475,7 @@ const ChatPage: React.FC = () => {
                         const profile = userProfiles[member.wallet_address];
                         const displayName = getDisplayName(member.wallet_address, profile);
                         const avatarUrl = getAvatarUrl(profile);
-                        
+
                         return (
                           <div key={member.user_id} className="p-3 hover:bg-[#111] transition-colors border-b border-gray-900/50">
                             <div className="flex items-center gap-3">
@@ -2494,8 +2492,8 @@ const ChatPage: React.FC = () => {
                                   </div>
                                 )}
                               </div>
-                              <div className="flex-1">
-                                <p className="font-medium text-sm text-gray-200">{displayName}</p>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm truncate text-gray-200">{displayName}</p>
                                 <p className="text-xs text-gray-500 truncate">{formatWalletAddress(member.wallet_address)}</p>
                               </div>
                               {member.is_admin && (
@@ -2509,10 +2507,10 @@ const ChatPage: React.FC = () => {
                   </div>
                 )}
 
-                <div 
+                <div
                   ref={messagesContainerRef}
                   className="flex-1 overflow-auto p-4 bg-black"
-                  style={{ 
+                  style={{
                     maxWidth: '100%',
                     overflowX: 'hidden'
                   }}
@@ -2563,29 +2561,29 @@ const ChatPage: React.FC = () => {
                       {renderMessagesWithDateGroups()}
                     </div>
                   )}
-                  
+
                   {typingUsers.size > 0 && (
                     <div className="flex items-center ml-4">
                       <Loader2 className="w-4 h-4 animate-spin mr-2 text-cyan-500" />
                       <span className="text-sm text-gray-500">
-                        {Array.from(typingUsers).map(formatWalletAddress).join(', ')} 
+                        {Array.from(typingUsers).map(formatWalletAddress).join(', ')}
                         {typingUsers.size === 1 ? ' is' : ' are'} typing...
                       </span>
                     </div>
                   )}
-                  
+
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="p-4 border-t border-gray-900 bg-[#0a0a0a] sticky bottom-0 z-10">
+                <div className="p-4 border-t border-gray-900 bg-[#0a0a0a] sticky bottom-0 z-10 flex-shrink-0">
                   {fileInput && (
                     <div className="mb-3 p-3 rounded-xl bg-[#111] border border-gray-900 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center">
                           {getFileIcon(fileInput.type)}
                         </div>
-                        <div>
-                          <p className="font-medium text-sm truncate text-gray-200 max-w-xs">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate text-gray-200">
                             {fileInput.name}
                           </p>
                           <p className="text-xs text-gray-500">
@@ -2603,7 +2601,7 @@ const ChatPage: React.FC = () => {
                   )}
 
                   {showEmojiPicker && (
-                    <div 
+                    <div
                       ref={emojiPickerRef}
                       className="mb-3 p-4 rounded-2xl bg-black border border-gray-900 shadow-2xl"
                     >
@@ -2671,7 +2669,7 @@ const ChatPage: React.FC = () => {
                         <Smile className="w-5 h-5 text-gray-500" />
                       </button>
                     </div>
-                    
+
                     <div className="flex-1 relative min-w-0">
                       <textarea
                         ref={textareaRef}
@@ -2692,20 +2690,19 @@ const ChatPage: React.FC = () => {
                         rows={messageRows}
                         className="w-full bg-[#111] border border-gray-900 text-gray-200 placeholder-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-transparent shadow-sm disabled:opacity-50 resize-none overflow-hidden min-h-[44px] max-h-[120px]"
                       />
-                      
+
                       <div className={`absolute bottom-2 right-2 text-xs ${newMessage.length > 1000 ? 'text-red-400' : 'text-gray-600'}`}>
                         {newMessage.length}/1000
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={handleSendMessage}
                       disabled={(!newMessage.trim() && !fileInput) || !socket || socket.disconnected || selectedRoom.status === 'pending' || newMessage.length > 1000 || uploadingFile}
-                      className={`px-4 sm:px-6 h-[44px] ${
-                        (!newMessage.trim() && !fileInput) || newMessage.length > 1000
-                          ? 'bg-[#111] text-gray-600'
-                          : 'bg-gradient-to-r from-cyan-900/30 to-black hover:from-cyan-800/30 hover:to-black text-cyan-400 border border-cyan-900/50'
-                      } disabled:cursor-not-allowed rounded-xl font-medium transition-all duration-200 flex items-center gap-2 self-end`}
+                      className={`px-4 sm:px-6 h-[44px] ${(!newMessage.trim() && !fileInput) || newMessage.length > 1000
+                        ? 'bg-[#111] text-gray-600'
+                        : 'bg-gradient-to-r from-cyan-900/30 to-black hover:from-cyan-800/30 hover:to-black text-cyan-400 border border-cyan-900/50'
+                        } disabled:cursor-not-allowed rounded-xl font-medium transition-all duration-200 flex items-center gap-2 self-end`}
                     >
                       {uploadingFile ? (
                         <>
@@ -2748,7 +2745,7 @@ const ChatPage: React.FC = () => {
                     OpenForge Chat
                   </h1>
                   <p className="text-lg sm:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto text-gray-500">
-                    Connect with builders, developers, and creators in the OpenForge ecosystem. 
+                    Connect with builders, developers, and creators in the OpenForge ecosystem.
                     Share ideas, collaborate on projects, and grow together in decentralized chat rooms.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
@@ -2767,7 +2764,7 @@ const ChatPage: React.FC = () => {
                       Refresh Rooms
                     </button>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mt-8 sm:mt-12 max-w-2xl mx-auto">
                     <div className="p-3 sm:p-4 rounded-xl bg-[#0a0a0a] border border-gray-900">
                       <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-cyan-900/30 to-black flex items-center justify-center mb-2 sm:mb-3 mx-auto border border-cyan-900/50">
@@ -2800,7 +2797,7 @@ const ChatPage: React.FC = () => {
 
       {/* Mobile Overlay */}
       {showRoomSidebar && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black/50 z-30"
           onClick={() => setShowRoomSidebar(false)}
         />
@@ -2828,7 +2825,7 @@ const ChatPage: React.FC = () => {
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-500">Room Name</label>
@@ -2840,7 +2837,7 @@ const ChatPage: React.FC = () => {
                   placeholder="Enter room name"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-500">Description (optional)</label>
                 <textarea
@@ -2851,17 +2848,16 @@ const ChatPage: React.FC = () => {
                   placeholder="What's this room about?"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-500">Room Type</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setNewRoom({ ...newRoom, roomType: 'public' })}
-                    className={`p-3 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center gap-2 ${
-                      newRoom.roomType === 'public' 
-                        ? 'bg-gradient-to-br from-blue-900/30 to-black border-blue-900/50' 
-                        : 'bg-[#111] border-gray-900 hover:border-blue-900/50'
-                    }`}
+                    className={`p-3 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center gap-2 ${newRoom.roomType === 'public'
+                      ? 'bg-gradient-to-br from-blue-900/30 to-black border-blue-900/50'
+                      : 'bg-[#111] border-gray-900 hover:border-blue-900/50'
+                      }`}
                   >
                     <Globe className="w-5 h-5 text-blue-400" />
                     <span className="font-medium text-gray-200">Public</span>
@@ -2869,11 +2865,10 @@ const ChatPage: React.FC = () => {
                   </button>
                   <button
                     onClick={() => setNewRoom({ ...newRoom, roomType: 'private' })}
-                    className={`p-3 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center gap-2 ${
-                      newRoom.roomType === 'private' 
-                        ? 'bg-gradient-to-br from-purple-900/30 to-black border-purple-900/50' 
-                        : 'bg-[#111] border-gray-900 hover:border-purple-900/50'
-                    }`}
+                    className={`p-3 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center gap-2 ${newRoom.roomType === 'private'
+                      ? 'bg-gradient-to-br from-purple-900/30 to-black border-purple-900/50'
+                      : 'bg-[#111] border-gray-900 hover:border-purple-900/50'
+                      }`}
                   >
                     <Lock className="w-5 h-5 text-purple-400" />
                     <span className="font-medium text-gray-200">Private</span>
@@ -2881,13 +2876,13 @@ const ChatPage: React.FC = () => {
                   </button>
                 </div>
                 <p className="text-sm mt-2 text-gray-600">
-                  {newRoom.roomType === 'public' 
-                    ? 'Public rooms appear in the Discover tab. Users must request to join and you approve requests.' 
+                  {newRoom.roomType === 'public'
+                    ? 'Public rooms appear in the Discover tab. Users must request to join and you approve requests.'
                     : 'Private rooms are hidden. Only invited users can join.'}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowCreateRoom(false)}
@@ -2898,11 +2893,10 @@ const ChatPage: React.FC = () => {
               <button
                 onClick={handleCreateRoom}
                 disabled={!newRoom.name.trim() || isLoading}
-                className={`flex-1 ${
-                  !newRoom.name.trim() 
-                    ? 'bg-[#111] text-gray-600' 
-                    : 'bg-gradient-to-r from-cyan-900/30 to-black hover:from-cyan-800/30 hover:to-black text-cyan-400 border border-cyan-900/50'
-                } disabled:cursor-not-allowed py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2`}
+                className={`flex-1 ${!newRoom.name.trim()
+                  ? 'bg-[#111] text-gray-600'
+                  : 'bg-gradient-to-r from-cyan-900/30 to-black hover:from-cyan-800/30 hover:to-black text-cyan-400 border border-cyan-900/50'
+                  } disabled:cursor-not-allowed py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2`}
               >
                 {isLoading ? (
                   <>
@@ -2933,7 +2927,7 @@ const ChatPage: React.FC = () => {
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-500">Wallet Address</label>
@@ -2948,7 +2942,7 @@ const ChatPage: React.FC = () => {
                   Enter the wallet address you want to invite
                 </p>
               </div>
-              
+
               <div className="p-3 rounded-xl bg-gradient-to-br from-purple-900/10 to-black border border-purple-900/50">
                 <div className="flex items-center gap-2 mb-2">
                   <Lock className="w-4 h-4 text-purple-400" />
@@ -2959,7 +2953,7 @@ const ChatPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => {
@@ -2973,11 +2967,10 @@ const ChatPage: React.FC = () => {
               <button
                 onClick={() => handleInviteUser(selectedRoom.id, inviteWallet)}
                 disabled={!inviteWallet.trim() || !inviteWallet.startsWith('0x')}
-                className={`flex-1 ${
-                  !inviteWallet.trim() || !inviteWallet.startsWith('0x')
-                    ? 'bg-[#111] text-gray-600'
-                    : 'bg-gradient-to-r from-purple-900/30 to-black hover:from-purple-800/30 hover:to-black text-purple-400 border border-purple-900/50'
-                } disabled:cursor-not-allowed py-3 rounded-xl font-medium transition-all duration-200`}
+                className={`flex-1 ${!inviteWallet.trim() || !inviteWallet.startsWith('0x')
+                  ? 'bg-[#111] text-gray-600'
+                  : 'bg-gradient-to-r from-purple-900/30 to-black hover:from-purple-800/30 hover:to-black text-purple-400 border border-purple-900/50'
+                  } disabled:cursor-not-allowed py-3 rounded-xl font-medium transition-all duration-200`}
               >
                 Send Invite
               </button>
@@ -2998,7 +2991,7 @@ const ChatPage: React.FC = () => {
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               {pendingRequests.length === 0 ? (
                 <div className="text-center py-8">
@@ -3041,7 +3034,7 @@ const ChatPage: React.FC = () => {
                 ))
               )}
             </div>
-            
+
             <div className="mt-6">
               <button
                 onClick={() => setShowRequestsModal(false)}
