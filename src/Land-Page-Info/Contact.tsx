@@ -40,7 +40,7 @@ const ContactPage = () => {
       description: "For general inquiries and support",
       value: "support@openforge.io",
       color: "from-purple-600 to-purple-800",
-      action: "mailto:support@openforge.io"
+      action: "mailto:Singhabhay3145@gmail.com"
     },
     {
       icon: <MessageSquare className="w-6 h-6" />,
@@ -48,7 +48,7 @@ const ContactPage = () => {
       description: "Join our Discord for real-time help",
       value: "discord.gg/openforge",
       color: "from-indigo-600 to-purple-700",
-      action: "https://discord.gg/openforge"
+      action: "https://discord.gg/F6TUNZA9"
     },
     {
       icon: <Twitter className="w-6 h-6" />,
