@@ -1,4 +1,8 @@
 import { Routes, Route } from "react-router-dom"
+import { Analytics } from '@vercel/analytics/react';
+ 
+
+
 import { Web3Provider } from "./hooks/web3"
 import HomeLand from "./pages/Home"
 import Login from "./pages/Login"
@@ -61,6 +65,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 function App() {
   return (
     <Web3Provider>
+      <Analytics/>
       <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Land />} />

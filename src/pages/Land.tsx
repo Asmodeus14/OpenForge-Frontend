@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Analytics } from "@vercel/analytics/next"
+
 import { useState, useEffect } from "react";
 import { 
   Sparkles,
@@ -167,7 +167,7 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-950 overflow-x-hidden">
-      <Analytics/>
+      
       {/* Enhanced Glassmorphism Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         {/* Base Gradient */}
